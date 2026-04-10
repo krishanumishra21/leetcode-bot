@@ -2,28 +2,46 @@ import os
 import requests
 import json
 import time
+import random
 from datetime import datetime
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
-
-USERNAMES = [ "krishanu2109"]
+USERNAMES = ["krishanu2109"]
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-
 TIMES = [
     "20:00", "20:15", "20:30", "20:45",
-    "21:00", "21:15", "21:30", "22:45",
-    "22:00", "22:15", "22:30", "21:54",
+    "21:00", "21:15", "21:30",
+    "22:00", "22:15", "22:30", "22:45",
     "23:00", "23:15", "23:30", "23:45",
-    "1:11"
+    "01:29","01:36"
 ]
 
+# 😂 FUNNY MESSAGES
+def get_funny_message(user, solved):
+    if solved:
+        msgs = [
+            f"🔥 WAH {user}!! Aaj bhi solve kar diya 💪\nStreak strong hai ⚡",
+            f"😎 {user} OP hai bhai!\nDaily coding chal rahi hai 🚀",
+            f"💯 {user} ne phir se LeetCode pe maar diya!\nConsistency level MAX 🔥"
+        ]
+    else:
+        msgs = [
+            f"🚨 Oye {user}!! Solve kar le bhai 😤\nwarna streak gaya... GAYA 💀",
+            f"😡 {user} kya kar raha hai?\nLeetCode wait kar raha hai aur tu chill kar raha hai? 🤡",
+            f"⚠️ {user} ALERT!!\nStreak danger mein hai 🚨\nAbhi solve kar warna RIP 💀",
+            f"😂 {user} bhai serious ho ja\nStreak bolega: 'main chala' 🚶‍♂️💀",
+            f"😴 {user} uth ja bhai!\nLeetCode ro raha hai 😭\nCode maar 💻🔥"
+        ]
 
+    return random.choice(msgs)
+
+
+# 📲 TELEGRAM
 def send_telegram(msg):
     if not BOT_TOKEN or not CHAT_ID:
         print("❌ BOT_TOKEN or CHAT_ID missing")
@@ -32,11 +50,12 @@ def send_telegram(msg):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     try:
         requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
+        print("📩 Message sent")
     except Exception as e:
         print("❌ Telegram error:", e)
 
 
-
+# 🔍 CHECK LEETCODE
 def check_leetcode(username):
     try:
         url = "https://leetcode.com/graphql"
@@ -67,46 +86,46 @@ def check_leetcode(username):
         return False
 
     except Exception as e:
-        print(f" Error for {username}:", e)
+        print(f"❌ Error for {username}:", e)
         return False
 
 
-
+# 🔁 MAIN LOOP
 already_sent = set()
 current_day = datetime.now().date()
 
-print("🚀 Multi-user bot started...")
+print("🚀 Savage bot started... 😎")
 
 while True:
     try:
-        now_time = datetime.now().strftime("%H:%M")
-        today = datetime.now().date()
+        now = datetime.now()
+        now_time = now.strftime("%H:%M")
+        today = now.date()
 
-       
+        # 🔄 Reset daily
         if today != current_day:
             already_sent.clear()
             current_day = today
-            print(" New day reset")
+            print("🔄 New day reset")
 
-      
-        if now_time in TIMES and now_time not in already_sent:
-            print(f" Running at {now_time}")
+        # ⏰ CHECK TIMES
+        for t in TIMES:
+            if now_time == t and t not in already_sent:
+                print(f"⏰ Running at {t}")
 
-            message = " LeetCode Daily Report:\n\n"
+                message = "📊 LeetCode Daily Report:\n\n"
 
-            for user in USERNAMES:
-                solved = check_leetcode(user)
+                for user in USERNAMES:
+                    solved = check_leetcode(user)
 
-                if solved:
-                    message += f" {user} solved today \n"
-                else:
-                    message += f" {user} NOT solved \n"
+                    # 😂 FUN MESSAGE
+                    message += get_funny_message(user, solved) + "\n\n"
 
-            send_telegram(message)
-            already_sent.add(now_time)
+                send_telegram(message)
+                already_sent.add(t)
 
         time.sleep(30)
 
     except Exception as e:
-        print(" Loop error:", e)
+        print("❌ Loop error:", e)
         time.sleep(30)
