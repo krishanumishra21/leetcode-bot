@@ -5,16 +5,16 @@ import time
 from datetime import datetime
 from dotenv import load_dotenv
 
-# 🔐 LOAD ENV FILE
+
 load_dotenv()
 
-# 🔐 CONFIG
+
 USERNAMES = [ "krishanu2109"]
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# ⏰ TIMES
+
 TIMES = [
     "20:00", "20:15", "20:30", "20:45",
     "21:00", "21:15", "21:30", "22:45",
@@ -23,7 +23,7 @@ TIMES = [
     "1:11"
 ]
 
-# 📲 TELEGRAM FUNCTION
+
 def send_telegram(msg):
     if not BOT_TOKEN or not CHAT_ID:
         print("❌ BOT_TOKEN or CHAT_ID missing")
@@ -36,7 +36,7 @@ def send_telegram(msg):
         print("❌ Telegram error:", e)
 
 
-# 🔍 CHECK SINGLE USER
+
 def check_leetcode(username):
     try:
         url = "https://leetcode.com/graphql"
@@ -67,11 +67,11 @@ def check_leetcode(username):
         return False
 
     except Exception as e:
-        print(f"❌ Error for {username}:", e)
+        print(f" Error for {username}:", e)
         return False
 
 
-# 🔁 MAIN LOOP
+
 already_sent = set()
 current_day = datetime.now().date()
 
@@ -82,25 +82,25 @@ while True:
         now_time = datetime.now().strftime("%H:%M")
         today = datetime.now().date()
 
-        # 🔄 Reset daily
+       
         if today != current_day:
             already_sent.clear()
             current_day = today
-            print("🔄 New day reset")
+            print(" New day reset")
 
-        # ⏰ Check time
+      
         if now_time in TIMES and now_time not in already_sent:
-            print(f"⏰ Running at {now_time}")
+            print(f" Running at {now_time}")
 
-            message = "📊 LeetCode Daily Report:\n\n"
+            message = " LeetCode Daily Report:\n\n"
 
             for user in USERNAMES:
                 solved = check_leetcode(user)
 
                 if solved:
-                    message += f"✅ {user} solved today 🔥\n"
+                    message += f" {user} solved today \n"
                 else:
-                    message += f"🚨 {user} NOT solved ⚠️\n"
+                    message += f" {user} NOT solved \n"
 
             send_telegram(message)
             already_sent.add(now_time)
@@ -108,5 +108,5 @@ while True:
         time.sleep(30)
 
     except Exception as e:
-        print("❌ Loop error:", e)
+        print(" Loop error:", e)
         time.sleep(30)
