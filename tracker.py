@@ -3,11 +3,21 @@ import requests
 import json
 import time
 import random
+import threading
 from datetime import datetime
 from dotenv import load_dotenv
+from flask import Flask
 
 load_dotenv()
 
+# 🌐 Flask app (for Render free web service)
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "🚀 LeetCode Bot Running!"
+
+# 🔐 CONFIG
 USERNAMES = ["krishanu2109"]
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -18,7 +28,7 @@ TIMES = [
     "21:00", "21:15", "21:30",
     "22:00", "22:15", "22:30", "22:45",
     "23:00", "23:15", "23:30", "23:45",
-    "01:29","01:36","01:53"
+    "01:29", "01:36", "01:53"
 ]
 
 # 😂 FUNNY MESSAGES
@@ -37,9 +47,7 @@ def get_funny_message(user, solved):
             f"😂 {user} bhai serious ho ja\nStreak bolega: 'main chala' 🚶‍♂️💀",
             f"😴 {user} uth ja bhai!\nLeetCode ro raha hai 😭\nCode maar 💻🔥"
         ]
-
     return random.choice(msgs)
-
 
 # 📲 TELEGRAM
 def send_telegram(msg):
@@ -53,7 +61,6 @@ def send_telegram(msg):
         print("📩 Message sent")
     except Exception as e:
         print("❌ Telegram error:", e)
-
 
 # 🔍 CHECK LEETCODE
 def check_leetcode(username):
@@ -75,7 +82,6 @@ def check_leetcode(username):
         data = res.json()
 
         calendar = json.loads(data['data']['matchedUser']['submissionCalendar'])
-
         today = datetime.now().date()
 
         for ts in calendar:
@@ -90,42 +96,47 @@ def check_leetcode(username):
         return False
 
 
-# 🔁 MAIN LOOP
-already_sent = set()
-current_day = datetime.now().date()
+# 🔁 BOT LOOP (thread)
+def run_bot():
+    already_sent = set()
+    current_day = datetime.now().date()
 
-print("🚀 Savage bot started... 😎")
+    print("🚀 Savage bot started... 😎")
 
-while True:
-    try:
-        now = datetime.now()
-        now_time = now.strftime("%H:%M")
-        today = now.date()
+    while True:
+        try:
+            now = datetime.now()
+            now_time = now.strftime("%H:%M")
+            today = now.date()
 
-        # 🔄 Reset daily
-        if today != current_day:
-            already_sent.clear()
-            current_day = today
-            print("🔄 New day reset")
+            # 🔄 Reset daily
+            if today != current_day:
+                already_sent.clear()
+                current_day = today
+                print("🔄 New day reset")
 
-        # ⏰ CHECK TIMES
-        for t in TIMES:
-            if now_time == t and t not in already_sent:
-                print(f"⏰ Running at {t}")
+            # ⏰ CHECK TIMES
+            for t in TIMES:
+                if now_time == t and t not in already_sent:
+                    print(f"⏰ Running at {t}")
 
-                message = "📊 LeetCode Daily Report:\n\n"
+                    message = "📊 LeetCode Daily Report:\n\n"
 
-                for user in USERNAMES:
-                    solved = check_leetcode(user)
+                    for user in USERNAMES:
+                        solved = check_leetcode(user)
+                        message += get_funny_message(user, solved) + "\n\n"
 
-                    # 😂 FUN MESSAGE
-                    message += get_funny_message(user, solved) + "\n\n"
+                    send_telegram(message)
+                    already_sent.add(t)
 
-                send_telegram(message)
-                already_sent.add(t)
+            time.sleep(30)
 
-        time.sleep(30)
+        except Exception as e:
+            print("❌ Loop error:", e)
+            time.sleep(30)
 
-    except Exception as e:
-        print("❌ Loop error:", e)
-        time.sleep(30)
+
+# 🚀 START BOTH
+if __name__ == "__main__":
+    threading.Thread(target=run_bot).start()
+    app.run(host="0.0.0.0", port=10000)
