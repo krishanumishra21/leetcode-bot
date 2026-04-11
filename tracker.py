@@ -10,7 +10,7 @@ from flask import Flask
 
 load_dotenv()
 
-# 🌐 Flask app (for Render free web service)
+# 🌐 Flask app (Render needs this)
 app = Flask(__name__)
 
 @app.route("/")
@@ -23,9 +23,10 @@ USERNAMES = ["krishanu2109"]
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
+# ⏰ TEST TIME (SET THIS 2 MIN AHEAD WHEN TESTING)
 TIMES = [
     "20:00", "20:15", "20:30", "20:45",
-    "21:00", "21:15", "21:30","10:18",
+    "21:00", "21:15", "21:30",
     "22:00", "22:15", "22:30", "22:45",
     "23:00", "23:15", "23:30", "23:45",
     "01:29", "01:36", "01:53"
@@ -51,14 +52,17 @@ def get_funny_message(user, solved):
 
 # 📲 TELEGRAM
 def send_telegram(msg):
+    print("📤 Sending:", msg)
+
     if not BOT_TOKEN or not CHAT_ID:
         print("❌ BOT_TOKEN or CHAT_ID missing")
         return
 
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+
     try:
-        requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
-        print("📩 Message sent")
+        res = requests.post(url, data={"chat_id": CHAT_ID, "text": msg})
+        print("📩 Response:", res.text)
     except Exception as e:
         print("❌ Telegram error:", e)
 
@@ -96,12 +100,13 @@ def check_leetcode(username):
         return False
 
 
-# 🔁 BOT LOOP (thread)
+# 🔁 BOT LOOP
 def run_bot():
     already_sent = set()
     current_day = datetime.now().date()
 
-    print("🚀 Savage bot started... 😎")
+    print("🔥 BOT LOOP STARTED")
+    send_telegram("🚀 BOT STARTED SUCCESSFULLY")
 
     while True:
         try:
@@ -136,7 +141,12 @@ def run_bot():
             time.sleep(30)
 
 
-# 🚀 START BOTH
+# 🚀 START APP + BOT
 if __name__ == "__main__":
-    threading.Thread(target=run_bot).start()
+    print("🚀 Starting bot thread...")
+
+    bot_thread = threading.Thread(target=run_bot)
+    bot_thread.daemon = True   # 🔥 VERY IMPORTANT
+    bot_thread.start()
+
     app.run(host="0.0.0.0", port=10000)
