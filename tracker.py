@@ -23,9 +23,9 @@ USERNAMES = ["krishanu2109"]
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# ⏰ TIMES (added 10:37)
+# ⏰ TIMES (ADDED 10:37)
 TIMES = [
-    "10:37",  # ✅ TEST TIME
+    "10:48",
     "20:00", "20:15", "20:30", "20:45",
     "21:00", "21:15", "21:30",
     "22:00", "22:15", "22:30", "22:45",
@@ -112,6 +112,7 @@ def run_bot():
     while True:
         try:
             now = datetime.now()
+            now_time = now.strftime("%H:%M")
             today = now.date()
 
             # 🔄 Reset daily
@@ -120,15 +121,9 @@ def run_bot():
                 current_day = today
                 print("🔄 New day reset")
 
-            # ⏰ SMART TIME CHECK (FIXED)
+            # ✅ EXACT MATCH LOGIC (BEST)
             for t in TIMES:
-                scheduled_time = datetime.strptime(t, "%H:%M").replace(
-                    year=now.year, month=now.month, day=now.day
-                )
-
-                diff = abs((now - scheduled_time).total_seconds())
-
-                if diff < 60 and t not in already_sent:
+                if now_time == t and t not in already_sent:
                     print(f"⏰ Running at {t}")
 
                     message = "📊 LeetCode Daily Report:\n\n"
@@ -140,11 +135,12 @@ def run_bot():
                     send_telegram(message)
                     already_sent.add(t)
 
-            time.sleep(30)
+            # ⏱ Faster checking (VERY IMPORTANT)
+            time.sleep(10)
 
         except Exception as e:
             print("❌ Loop error:", e)
-            time.sleep(30)
+            time.sleep(10)
 
 
 # 🚀 START
