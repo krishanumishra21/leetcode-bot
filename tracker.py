@@ -10,7 +10,7 @@ from flask import Flask
 
 load_dotenv()
 
-# 🌐 Flask app (Render needs this)
+# 🌐 Flask app
 app = Flask(__name__)
 
 @app.route("/")
@@ -23,10 +23,11 @@ USERNAMES = ["krishanu2109"]
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-
+# ⏰ TIMES (added 10:37)
 TIMES = [
+    "10:37",  # ✅ TEST TIME
     "20:00", "20:15", "20:30", "20:45",
-    "21:00", "21:15", "21:30","10:26",
+    "21:00", "21:15", "21:30",
     "22:00", "22:15", "22:30", "22:45",
     "23:00", "23:15", "23:30", "23:45",
     "01:29", "01:36", "01:53"
@@ -111,7 +112,6 @@ def run_bot():
     while True:
         try:
             now = datetime.now()
-            now_time = now.strftime("%H:%M")
             today = now.date()
 
             # 🔄 Reset daily
@@ -120,9 +120,15 @@ def run_bot():
                 current_day = today
                 print("🔄 New day reset")
 
-            # ⏰ CHECK TIMES
+            # ⏰ SMART TIME CHECK (FIXED)
             for t in TIMES:
-                if now_time == t and t not in already_sent:
+                scheduled_time = datetime.strptime(t, "%H:%M").replace(
+                    year=now.year, month=now.month, day=now.day
+                )
+
+                diff = abs((now - scheduled_time).total_seconds())
+
+                if diff < 60 and t not in already_sent:
                     print(f"⏰ Running at {t}")
 
                     message = "📊 LeetCode Daily Report:\n\n"
@@ -141,12 +147,12 @@ def run_bot():
             time.sleep(30)
 
 
-# 🚀 START APP + BOT
+# 🚀 START
 if __name__ == "__main__":
     print("🚀 Starting bot thread...")
 
     bot_thread = threading.Thread(target=run_bot)
-    bot_thread.daemon = True   # 🔥 VERY IMPORTANT
+    bot_thread.daemon = True
     bot_thread.start()
 
     app.run(host="0.0.0.0", port=10000)
