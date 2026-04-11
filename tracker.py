@@ -23,10 +23,10 @@ USERNAMES = ["krishanu2109"]
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# ⏰ TEST TIME (SET THIS 2 MIN AHEAD WHEN TESTING)
+
 TIMES = [
     "20:00", "20:15", "20:30", "20:45",
-    "21:00", "21:15", "21:30",
+    "21:00", "21:15", "21:30","10:26",
     "22:00", "22:15", "22:30", "22:45",
     "23:00", "23:15", "23:30", "23:45",
     "01:29", "01:36", "01:53"
