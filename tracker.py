@@ -4,7 +4,7 @@ import json
 import time
 import random
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask import Flask
 
@@ -23,9 +23,10 @@ USERNAMES = ["krishanu2109"]
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
 
-# ⏰ TIMES (ADDED 10:37)
+# ⏰ TIMES (ADDED 10:48 + 10:57)
 TIMES = [
     "10:48",
+    "11:01",
     "20:00", "20:15", "20:30", "20:45",
     "21:00", "21:15", "21:30",
     "22:00", "22:15", "22:30", "22:45",
@@ -87,7 +88,9 @@ def check_leetcode(username):
         data = res.json()
 
         calendar = json.loads(data['data']['matchedUser']['submissionCalendar'])
-        today = datetime.now().date()
+
+        # ✅ IST date
+        today = (datetime.utcnow() + timedelta(hours=5, minutes=30)).date()
 
         for ts in calendar:
             date = datetime.fromtimestamp(int(ts)).date()
@@ -104,16 +107,19 @@ def check_leetcode(username):
 # 🔁 BOT LOOP
 def run_bot():
     already_sent = set()
-    current_day = datetime.now().date()
+    current_day = (datetime.utcnow() + timedelta(hours=5, minutes=30)).date()
 
     print("🔥 BOT LOOP STARTED")
     send_telegram("🚀 BOT STARTED SUCCESSFULLY")
 
     while True:
         try:
-            now = datetime.now()
+            # ✅ CONVERT UTC → IST
+            now = datetime.utcnow() + timedelta(hours=5, minutes=30)
             now_time = now.strftime("%H:%M")
             today = now.date()
+
+            print("⏰ IST TIME:", now_time)  # DEBUG
 
             # 🔄 Reset daily
             if today != current_day:
@@ -121,7 +127,7 @@ def run_bot():
                 current_day = today
                 print("🔄 New day reset")
 
-            # ✅ EXACT MATCH LOGIC (BEST)
+            # ✅ EXACT MATCH LOGIC
             for t in TIMES:
                 if now_time == t and t not in already_sent:
                     print(f"⏰ Running at {t}")
@@ -135,7 +141,6 @@ def run_bot():
                     send_telegram(message)
                     already_sent.add(t)
 
-            # ⏱ Faster checking (VERY IMPORTANT)
             time.sleep(10)
 
         except Exception as e:
