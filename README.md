@@ -1,6 +1,6 @@
 # LeetCode Reminder Bot (Telegram + Cloud)
 
-A smart automation system that tracks daily LeetCode activity and sends reminders via Telegram if no problem is solved.
+A smart automation system that tracks daily LeetCode activity and sends reminders via Telegram if no problem is solved. 
 
 ---
 
